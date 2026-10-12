@@ -2022,7 +2022,12 @@ const MSG={
   images_unavailable:"Este visualizador não consegue enviar imagens.",
   invalid_json:"A resposta veio incompleta. Tente gerar de novo.",
   refused:"O pedido foi recusado. Confira se os prints são telas do Instagram.",
-  session_expired:"Sua sessão expirou. Entre de novo no Claude."
+  session_expired:"Sua sessão expirou. Entre de novo no Claude.",
+  srv_key:"A análise está fora do ar: a chave da IA não foi configurada ou está errada.",
+  srv_credit:"A análise está fora do ar: a conta da IA está sem créditos.",
+  srv_model:"A análise está fora do ar: modelo de IA não encontrado.",
+  srv_busy:"A IA está sobrecarregada agora. Tente de novo em alguns minutos.",
+  srv_timeout:"A análise demorou demais. Tente de novo com 2 ou 3 prints."
 };
 
 /* scan overlay with real progress from the streamed JSON */
@@ -2111,7 +2116,8 @@ function serverSample(){
     catch(e){ throw {code:e?.name==="AbortError"?"cancelled":"upstream_error"}; }
     if(r.status===429) throw {code:"rate_limited"};
     if(r.status===504||r.status===502&&!r.headers.get("content-type")?.includes("json")) throw {code:"upstream_error"};
-    const d=await r.json().catch(()=>({})); if(!r.ok||!d.text) throw {code:"upstream_error"};
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.text){ const map={sem_chave:"srv_key",chave_invalida:"srv_key",sem_credito:"srv_credit",modelo:"srv_model",ocupado:"srv_busy",limite:"rate_limited"}; throw {code:map[d.error]||(r.status===504||r.status===502&&!d.error?"srv_timeout":"upstream_error")}; }
     opts.onText?.({text:d.text,delta:d.text}); return {text:d.text,truncated:false};
   }
   const f=(i,o)=>call(i,o);

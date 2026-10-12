@@ -6,6 +6,7 @@ const MODEL = {
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json" } });
 
 export default async (req) => {
+  if (!process.env.ANTHROPIC_API_KEY) return json({ error: "sem_chave" }, 500);
   let body;
   try { body = await req.json(); } catch { return json({ error: "json" }, 400); }
   const { messages = [], images = [], tier = "default" } = body || {};
@@ -23,7 +24,17 @@ export default async (req) => {
     body: JSON.stringify({ model: MODEL[tier] || MODEL.default, max_tokens: 4500, messages: msgs }),
   });
   const d = await r.json();
-  if (!r.ok) { console.error("anthropic", d); return json({ error: "falha na análise" }, 502); }
+  if (!r.ok) {
+    console.error("anthropic", r.status, JSON.stringify(d));
+    const t = d?.error?.type || "", m = String(d?.error?.message || "");
+    const code = t === "authentication_error" || t === "permission_error" ? "chave_invalida"
+      : /credit|billing|balance/i.test(m) ? "sem_credito"
+      : t === "not_found_error" ? "modelo"
+      : t === "overloaded_error" || r.status === 529 ? "ocupado"
+      : t === "rate_limit_error" ? "limite"
+      : "falha";
+    return json({ error: code }, 502);
+  }
   return json({ text: (d.content || []).filter(c => c.type === "text").map(c => c.text).join("") });
 };
 
