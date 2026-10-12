@@ -2047,11 +2047,11 @@ const MSG={
   invalid_json:"A resposta veio incompleta. Tente gerar de novo.",
   refused:"O pedido foi recusado. Confira se os prints são telas do Instagram.",
   session_expired:"Sua sessão expirou. Entre de novo no Claude.",
-  srv_key:"A análise está fora do ar: a chave da IA não foi configurada ou está errada.",
-  srv_credit:"A análise está fora do ar: a conta da IA está sem créditos.",
-  srv_model:"A análise está fora do ar: modelo de IA não encontrado.",
-  srv_busy:"A IA está sobrecarregada agora. Tente de novo em alguns minutos.",
-  srv_timeout:"A análise demorou demais. Tente de novo com 2 ou 3 prints."
+  srv_key:"Estamos ajustando a análise agora. Tente de novo em alguns minutos.",
+  srv_credit:"Estamos ajustando a análise agora. Tente de novo em alguns minutos.",
+  srv_model:"Estamos ajustando a análise agora. Tente de novo em alguns minutos.",
+  srv_busy:"Muita gente analisando agora. Tente de novo em 1 minuto.",
+  srv_timeout:"A análise demorou mais que o normal. Tente de novo com 2 ou 3 prints."
 };
 
 /* scan overlay with real progress from the streamed JSON */
@@ -2078,7 +2078,11 @@ $("go").onclick=async()=>{
     setStatus("Pronto. Explore as abas e converse com a Ghosty.");
   }catch(e){
     if(e?.code==="cancelled") setStatus("Análise interrompida.");
-    else setStatus((MSG[e?.code]||"Não deu certo desta vez. Tente de novo.")+(e?.detail?` (código: ${e.detail})`:""),true);
+    else{
+      let owner=false; try{owner=localStorage.getItem("gx-owner")==="1";}catch{}
+      const tech={srv_key:"chave da Anthropic inválida ou ausente no Netlify",srv_credit:"conta da Anthropic sem créditos",srv_model:"modelo de IA não encontrado"}[e?.code];
+      setStatus((MSG[e?.code]||"Não conseguimos analisar agora. Tente de novo em instantes.")+(owner&&(tech||e?.detail)?` [Só você vê isto: ${tech||""}${e?.detail?` · ${e.detail}`:""}]`:""),true);
+    }
   }finally{
     $("scan").hidden=true;
     $("go").disabled=!files.length;$("stop").hidden=true;document.body.classList.remove("loading");
