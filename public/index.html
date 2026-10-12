@@ -548,6 +548,14 @@ nav.tabs button:hover{color:var(--fg)}
 .gridlist li b{display:block;font-weight:600}
 .gridlist li span{color:var(--muted);font-size:12.5px}
 .panel[hidden]{display:none}
+.exbanner{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;padding:18px 20px;border-radius:18px;background:color-mix(in srgb,var(--warn) 12%,var(--card));box-shadow:0 0 0 1.5px color-mix(in srgb,var(--warn) 55%,transparent) inset}
+.exbanner[hidden]{display:none}
+.exb-ic{font-size:28px}
+.exb-tx{flex:1 1 260px;min-width:0;display:grid;gap:2px}
+.exb-tx b{font-family:var(--display);font-weight:600;font-size:18px;color:var(--warn)}
+.exb-tx span{font-size:14px;color:var(--fg)}
+.exb-btn{width:auto;padding:11px 18px;font-size:14px}
+.exmode .main .card,.exmode .main .phone{opacity:.92}
 /* interactive additions */
 .brow{background:none;border:0;color:inherit;font:inherit;text-align:left;padding:10px 12px;margin:-10px -12px;border-radius:12px;cursor:pointer;width:calc(100% + 24px);transition:background .15s}
 .brow:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
@@ -835,18 +843,6 @@ nav.tabs button:hover{color:var(--fg)}
 
   <div class="body">
     <aside class="side">
-      <section class="card profile" aria-label="Perfil analisado">
-        <span class="pill warn exflag" id="exFlag">Exemplo</span>
-        <div class="avatar"><div id="pInit">AD</div></div>
-        <div class="name" id="pName"></div>
-        <div class="handle" id="pHandle"></div>
-        <div class="pstats">
-          <div><b id="sPosts">—</b><span>posts</span></div>
-          <div><b id="sFol">—</b><span>seguidores</span></div>
-          <div><b id="sIng">—</b><span>seguindo</span></div>
-        </div>
-      </section>
-
       <section class="card" aria-labelledby="h-up">
         <div class="card-h"><h2 id="h-up">Analisar meu perfil</h2></div>
         <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher prints">
@@ -881,9 +877,27 @@ nav.tabs button:hover{color:var(--fg)}
         <p class="status" id="status" role="status">Adicione pelo menos 1 print.</p>
         <p class="muted" style="font-size:12px;margin:8px 0 0">Seus prints são usados só para gerar o diagnóstico. <a href="#privacidade" style="color:var(--accent-2)">Política de Privacidade</a></p>
       </section>
+
+      <section class="card profile" id="profCard" aria-label="Perfil analisado" hidden>
+        <span class="pill warn exflag" id="exFlag">Exemplo</span>
+        <div class="avatar"><div id="pInit">AD</div></div>
+        <div class="name" id="pName"></div>
+        <div class="handle" id="pHandle"></div>
+        <div class="pstats">
+          <div><b id="sPosts">—</b><span>posts</span></div>
+          <div><b id="sFol">—</b><span>seguidores</span></div>
+          <div><b id="sIng">—</b><span>seguindo</span></div>
+        </div>
+      </section>
+
     </aside>
 
     <main class="main">
+      <div class="exbanner" id="exBanner">
+        <div class="exb-ic" aria-hidden="true">👀</div>
+        <div class="exb-tx"><b>Exemplo de resultado</b><span>Este é o diagnóstico de um perfil fictício, só para você ver como fica. Envie os seus prints para gerar o seu.</span></div>
+        <button class="btn exb-btn" type="button" id="exGo">Enviar meus prints</button>
+      </div>
       <!-- Visão geral -->
       <div class="panel" id="p-ov" role="tabpanel" aria-labelledby="t-ov">
         <div class="main">
@@ -1912,6 +1926,8 @@ function renderPlan(){
 function render(d,isExample){
   D=d; level=isExample?3:boughtLevel(); selCat=0; selPost=0; chatTurns=[]; resetChat();
   $("exFlag").hidden=!isExample;
+  $("profCard").hidden=!!isExample;
+  $("exBanner").hidden=!isExample;
   $("pInit").textContent=initials();
   $("pName").textContent=d.nome||"Seu perfil";
   $("pHandle").textContent=d.handle||"";
@@ -1977,6 +1993,7 @@ async function copyText(btn,text,label){
   catch{btn.textContent="Selecione e copie";setTimeout(()=>btn.textContent=label,2000);}
 }
 $("copyBio").onclick=()=>copyText($("copyBio"),$("bioEdit").value+((D.perfilIdeal||{}).link?"\n🔗 "+D.perfilIdeal.link:""),"Copiar bio");
+$("exGo").onclick=()=>{ $("drop").scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"}); setTimeout(()=>$("drop").focus({preventScroll:true}),400); };
 $("copyBioOv").onclick=()=>copyText($("copyBioOv"),$("bioOvTxt").textContent,"Copiar bio");
 $("copyLeg").onclick=()=>copyText($("copyLeg"),$("postLeg").textContent,"Copiar legenda");
 
