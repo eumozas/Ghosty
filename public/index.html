@@ -1293,7 +1293,7 @@ nav.tabs button:hover{color:var(--fg)}
     if(location.hash==="#privacidade") open();
   })();
 
-  // bonus popup: once per visit, after 14s, 45% scroll or exit intent
+  // bonus popup: once per visit, after 5s, 25% scroll or exit intent
   (()=>{
     const pop=document.getElementById("bonusPop"), row=document.getElementById("bpRow");
     const ic=["M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0","M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01","M12 21s-7.5-4.6-9.5-9.6C1 7.8 3.4 4 7 4c2 0 3.4 1 5 3 1.6-2 3-3 5-3 3.6 0 6 3.8 4.5 7.4C19.5 16.4 12 21 12 21z","M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"];
@@ -1317,8 +1317,8 @@ nav.tabs button:hover{color:var(--fg)}
     document.getElementById("bpGo").onclick=()=>close();
     pop.addEventListener("click",e=>{if(e.target===pop)close();});
     addEventListener("keydown",e=>{if(e.key==="Escape"&&!pop.hidden)close();});
-    const t=setTimeout(open,14000);
-    const onSc=()=>{ if(scrollY/(document.documentElement.scrollHeight-innerHeight)>.45) open(); };
+    const t=setTimeout(open,5000);
+    const onSc=()=>{ if(scrollY/(document.documentElement.scrollHeight-innerHeight)>.25) open(); };
     const onOut=e=>{ if(e.clientY<=0) open(); };
     addEventListener("scroll",onSc,{passive:true}); document.addEventListener("mouseout",onOut);
     function cleanup(){ clearTimeout(t); removeEventListener("scroll",onSc); document.removeEventListener("mouseout",onOut); }
