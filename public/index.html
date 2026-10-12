@@ -676,7 +676,7 @@ nav.tabs button:hover{color:var(--fg)}
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Pronto em 2 minutos</span>
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>Só prints, sem senha</span>
       </div>
-      <div class="visits" id="visits" hidden><span class="dot"></span><b id="visitsN">0</b> visitas no site</div>
+      <div class="visits" id="visits" hidden><span class="dot"></span><b id="visitsN">0</b> pessoas já visitaram</div>
     </div>
 
     <div class="s-stage" id="stage" aria-hidden="true">
@@ -1427,7 +1427,14 @@ nav.tabs button:hover{color:var(--fg)}
   (async()=>{
     if(!window.GHOSTY_SERVER) return;
     const MIN_SHOW=0; // só mostra o contador a partir deste número de visitas
-    let isNew=false; try{ isNew=!sessionStorage.getItem("gx-visit"); sessionStorage.setItem("gx-visit","1"); }catch{}
+    // conta cada aparelho uma vez só; o dono abre o site com ?souodono uma vez para nunca ser contado
+    let isNew=false;
+    try{
+      if(new URLSearchParams(location.search).has("souodono")) localStorage.setItem("gx-owner","1");
+      const owner=localStorage.getItem("gx-owner")==="1";
+      isNew=!owner && !localStorage.getItem("gx-visited");
+      if(isNew) localStorage.setItem("gx-visited","1");
+    }catch{}
     try{
       const r=await fetch("/api/visitas",{method:isNew?"POST":"GET"}); const d=await r.json();
       const n=+d.total||0; if(n<MIN_SHOW) return;
