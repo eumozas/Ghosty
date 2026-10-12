@@ -2092,7 +2092,8 @@ $("stop").onclick=$("stop2").onclick=()=>ctl?.abort();
 
 /* bio variations */
 $("bioMore").onclick=async()=>{
-  if(!sample){$("variants").innerHTML=`<span class="muted">Disponível quando a página está aberta no Claude.</span>`;return;}
+  if(D===EXEMPLO){$("variants").innerHTML=`<span class="muted">Envie seus prints primeiro: as novas versões são criadas para a SUA bio.</span>`;return;}
+  if(!sample){$("variants").innerHTML=`<span class="muted">Não conseguimos gerar agora. Tente de novo em instantes.</span>`;return;}
   const b=$("bioMore"); b.disabled=true; b.textContent="Escrevendo...";
   try{
     const arr=await sample.json(`Escreva 3 versões diferentes de bio de Instagram para este perfil, em português do Brasil. Cada uma com até 4 linhas curtas e no máximo 150 caracteres, dizendo o que faz, para quem/onde e como comprar ou contratar. Tons: 1) direto, 2) afetivo, 3) com prova social.
@@ -2118,8 +2119,10 @@ Se perguntarem algo fora de Instagram e marketing, responda em uma frase e volte
 async function ask(q){
   q=q.trim(); if(!q) return;
   $("sugs").hidden=true; $("ask").value="";
-  bubble("me",q); chatTurns.push({role:"user",content:q});
-  if(!sample){bubble("gh","O chat funciona quando a página está aberta no Claude.");chatTurns.pop();return;}
+  bubble("me",q);
+  if(D===EXEMPLO){ bubble("gh","Eu converso sobre o SEU perfil 👻 Envie seus prints em \"Analisar meu perfil\" e, assim que o diagnóstico sair, pergunte o que quiser."); return; }
+  chatTurns.push({role:"user",content:q});
+  if(!sample){bubble("gh","Não consegui responder agora. Tente de novo em instantes.");chatTurns.pop();return;}
   const m=bubble("gh think","Pensando...");
   $("send").disabled=true;
   try{
@@ -2127,7 +2130,7 @@ async function ask(q){
     const {text}=await sample(turns,{cache:false,modelTier:"default",onText:({text})=>{m.classList.remove("think");m.textContent=text;$("msgs").scrollTop=$("msgs").scrollHeight;}});
     m.textContent=text.replace(/\*\*/g,""); chatTurns.push({role:"assistant",content:text});
   }catch(e){
-    m.classList.remove("think"); m.textContent=e?.text||(MSG[e?.code]||"Não consegui responder agora. Tente de novo."); chatTurns.pop();
+    m.classList.remove("think"); m.textContent=e?.text||(MSG[e?.code]||"Não consegui responder agora. Tente de novo em instantes."); chatTurns.pop();
   }finally{$("send").disabled=false;$("ask").focus();}
 }
 $("compose").addEventListener("submit",e=>{e.preventDefault();ask($("ask").value);});
