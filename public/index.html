@@ -2054,7 +2054,7 @@ $("go").onclick=async()=>{
     setStatus("Pronto. Explore as abas e converse com a Ghosty.");
   }catch(e){
     if(e?.code==="cancelled") setStatus("Análise interrompida.");
-    else setStatus(MSG[e?.code]||"Não deu certo desta vez. Tente de novo.",true);
+    else setStatus((MSG[e?.code]||"Não deu certo desta vez. Tente de novo.")+(e?.detail?` (código: ${e.detail})`:""),true);
   }finally{
     $("scan").hidden=true;
     $("go").disabled=!files.length;$("stop").hidden=true;document.body.classList.remove("loading");
@@ -2117,7 +2117,7 @@ function serverSample(){
     if(r.status===429) throw {code:"rate_limited"};
     if(r.status===504||r.status===502&&!r.headers.get("content-type")?.includes("json")) throw {code:"upstream_error"};
     const d=await r.json().catch(()=>({}));
-    if(!r.ok||!d.text){ const map={sem_chave:"srv_key",chave_invalida:"srv_key",sem_credito:"srv_credit",modelo:"srv_model",ocupado:"srv_busy",limite:"rate_limited"}; throw {code:map[d.error]||(r.status===504||r.status===502&&!d.error?"srv_timeout":"upstream_error")}; }
+    if(!r.ok||!d.text){ const map={sem_chave:"srv_key",chave_invalida:"srv_key",sem_credito:"srv_credit",modelo:"srv_model",ocupado:"srv_busy",limite:"rate_limited"}; throw {code:map[d.error]||(r.status===504||r.status===502&&!d.error?"srv_timeout":"upstream_error"),detail:d.detail||("HTTP "+r.status)}; }
     opts.onText?.({text:d.text,delta:d.text}); return {text:d.text,truncated:false};
   }
   const f=(i,o)=>call(i,o);

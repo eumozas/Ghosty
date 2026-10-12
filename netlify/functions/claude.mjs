@@ -23,7 +23,7 @@ export default async (req) => {
     headers: { "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({ model: MODEL[tier] || MODEL.default, max_tokens: 4500, messages: msgs }),
   });
-  const d = await r.json();
+  const d = await r.json().catch(() => ({}));
   if (!r.ok) {
     console.error("anthropic", r.status, JSON.stringify(d));
     const t = d?.error?.type || "", m = String(d?.error?.message || "");
@@ -33,7 +33,7 @@ export default async (req) => {
       : t === "overloaded_error" || r.status === 529 ? "ocupado"
       : t === "rate_limit_error" ? "limite"
       : "falha";
-    return json({ error: code }, 502);
+    return json({ error: code, detail: `${r.status} ${t}`.trim() }, 502);
   }
   return json({ text: (d.content || []).filter(c => c.type === "text").map(c => c.text).join("") });
 };
